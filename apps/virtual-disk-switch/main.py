@@ -1,4 +1,5 @@
 import importlib
+import glob
 import mmap
 import os
 import subprocess
@@ -30,10 +31,14 @@ ERROR = (240, 99, 99)
 USB_HELPER = "/kvmapp/scripts/usbdev.sh"
 USB_HELPER_ACTION = "restart"
 USB_DISK0_FLAG = "/boot/usb.disk0"
+USB_DISK0_RO_FLAG = "/boot/usb.disk0.ro"
 USB_DISK_SD_FLAG = "/boot/usb.disk1.sd"
 USB_DISK_GENERIC_FLAG = "/boot/usb.disk1"
 USB_DISK_EMMC_FLAG = "/boot/usb.disk1.emmc"
 USB_MODE_FLAGS = (USB_DISK_SD_FLAG, USB_DISK_GENERIC_FLAG, USB_DISK_EMMC_FLAG)
+IMAGE_NONE = "/dev/mmcblk0p3"
+UDC_CLASS_PATH = "/sys/class/udc"
+MOUNT_DEVICE_GLOB = "/sys/kernel/config/usb_gadget/*/functions/mass_storage*/lun.0/file"
 SDCARD_PARTITION = "/dev/mmcblk1p1"
 EMMC_IMAGE = "/exfat.img"
 MASS_STORAGE_LUN = "/sys/kernel/config/usb_gadget/g0/configs/c.1/mass_storage.disk1/lun.0/file"
@@ -81,6 +86,36 @@ def clip_to_width(draw, value, font, max_width):
             return candidate
         text = text[:-1]
     return "..."
+
+
+def wrap_text(draw, value, font, max_width, max_lines=2):
+    text = "-" if value is None else str(value).strip()
+    if not text:
+        return ["-"]
+
+    words = text.split()
+    if not words:
+        return [clip_to_width(draw, text, font, max_width)]
+
+    lines = []
+    current = words[0]
+    for word in words[1:]:
+        candidate = current + " " + word
+        if draw.textbbox((0, 0), candidate, font=font)[2] <= max_width:
+            current = candidate
+        else:
+            lines.append(current)
+            current = word
+            if len(lines) >= max_lines - 1:
+                break
+
+    remainder_start = len(" ".join(lines + [current]).split())
+    if remainder_start < len(words):
+        remaining = " ".join(words[remainder_start - len(current.split()):])
+        current = clip_to_width(draw, remaining, font, max_width)
+
+    lines.append(current)
+    return lines[:max_lines]
 
 
 class InputDeviceFinder:
@@ -268,6 +303,91 @@ class VirtualDiskBackend:
         except OSError:
             return ""
 
+    def read_text(self, path, default=""):
+        try:
+            with open(path, "r", encoding="utf-8") as handle:
+                return handle.read().strip()
+        except OSError:
+            return default
+
+    def write_text(self, path, value):
+        with open(path, "w", encoding="utf-8") as handle:
+            handle.write(value)
+
+    def find_image_storage_paths(self):
+        candidates = sorted(glob.glob(MOUNT_DEVICE_GLOB))
+        if not candidates:
+            return None
+        mount_device = candidates[0]
+        lun_dir = os.path.dirname(mount_device)
+        function_dir = os.path.dirname(lun_dir)
+        functions_dir = os.path.dirname(function_dir)
+        gadget_dir = os.path.dirname(functions_dir)
+        return {
+            "mount_device": mount_device,
+            "cdrom_flag": os.path.join(lun_dir, "cdrom"),
+            "forced_eject": os.path.join(lun_dir, "forced_eject"),
+            "ro_flag": os.path.join(lun_dir, "ro"),
+            "udc_path": os.path.join(gadget_dir, "UDC"),
+        }
+
+    def current_udc(self, paths):
+        return self.read_text(paths["udc_path"], "")
+
+    def set_udc_enabled(self, paths, enabled):
+        if not enabled:
+            for attempt in range(5):
+                try:
+                    self.write_text(paths["udc_path"], "")
+                    time.sleep(1.0)
+                    return
+                except OSError:
+                    if not self.current_udc(paths):
+                        return
+                    if attempt == 4:
+                        raise
+                    time.sleep(0.5)
+            return
+
+        udc_names = []
+        if os.path.isdir(UDC_CLASS_PATH):
+            udc_names = os.listdir(UDC_CLASS_PATH)
+        if not udc_names:
+            raise RuntimeError("USB UDC not found")
+
+        for attempt in range(5):
+            try:
+                self.write_text(paths["udc_path"], udc_names[0])
+                time.sleep(1.0)
+                return
+            except OSError:
+                if self.current_udc(paths):
+                    return
+                if attempt == 4:
+                    raise
+                time.sleep(0.5)
+
+    def detach_current_image(self, paths):
+        self.set_udc_enabled(paths, False)
+        forced_eject_path = paths.get("forced_eject")
+        if forced_eject_path and os.path.exists(forced_eject_path):
+            try:
+                self.write_text(forced_eject_path, "1")
+            except OSError:
+                pass
+        try:
+            self.write_text(paths["mount_device"], "\n")
+        except OSError:
+            pass
+        time.sleep(1.0)
+
+    def unmount_image_mount(self):
+        if not self.image_mount_active():
+            return "Image mount already disabled"
+        self.remove_flag(USB_DISK0_RO_FLAG)
+        self.remove_flag(USB_DISK0_FLAG)
+        return "Image mount disabled"
+
     def sdcard_available(self):
         return os.path.exists(SDCARD_PARTITION)
 
@@ -350,6 +470,10 @@ class VirtualDiskBackend:
         }
         return labels[mode]
 
+    def unmount_image_and_set_mode(self, mode):
+        self.unmount_image_mount()
+        return self.set_mode(mode)
+
 
 class ActionWorker(threading.Thread):
     def __init__(self, app, callback):
@@ -378,14 +502,22 @@ class VirtualDiskSwitchApp:
         self.message = "Choose a source for Virtual Disk."
         self.focus_index = 1
         self.last_knob_at = 0.0
+        self.confirm_mode = None
+        self.confirm_focus = 0
         self.header_exit_rect = (10, 10, 38, 38)
-        self.disable_button = (16, 116, 100, 156)
-        self.emmc_button = (110, 116, 204, 156)
-        self.sdcard_button = (214, 116, 304, 156)
+        self.disable_button = (16, 118, 100, 154)
+        self.emmc_button = (110, 118, 204, 154)
+        self.sdcard_button = (214, 118, 304, 154)
+        self.confirm_yes_button = (44, 132, 148, 160)
+        self.confirm_no_button = (172, 132, 276, 160)
         self.buttons = [
             {"label": "Disable", "mode": "disable", "rect": self.disable_button},
             {"label": "eMMC", "mode": "emmc", "rect": self.emmc_button},
             {"label": "SD Card", "mode": "sdcard", "rect": self.sdcard_button},
+        ]
+        self.confirm_buttons = [
+            {"label": "YES", "action": "yes", "rect": self.confirm_yes_button},
+            {"label": "NO", "action": "no", "rect": self.confirm_no_button},
         ]
         self.refresh_status()
 
@@ -399,10 +531,33 @@ class VirtualDiskSwitchApp:
         with self.lock:
             if self.busy:
                 return
+            if self.backend.image_mount_active():
+                self.confirm_mode = mode
+                self.confirm_focus = 0
+                self.error = None
+                self.message = "Disable ISO/Image mount first?"
+                return
             self.busy = True
+            self.confirm_mode = None
             self.error = None
             self.message = "Switching to {0}...".format(mode)
         ActionWorker(self, lambda mode=mode: self.backend.set_mode(mode)).start()
+
+    def start_confirmed_action(self):
+        with self.lock:
+            if self.busy or not self.confirm_mode:
+                return
+            mode = self.confirm_mode
+            self.busy = True
+            self.error = None
+            self.message = "Unmounting image and switching..."
+            self.confirm_mode = None
+        ActionWorker(self, lambda mode=mode: self.backend.unmount_image_and_set_mode(mode)).start()
+
+    def cancel_confirmation(self):
+        self.confirm_mode = None
+        self.error = None
+        self.message = "Choose a source for Virtual Disk."
 
     def finish_action(self, message=None, error=None):
         self.refresh_status()
@@ -421,6 +576,10 @@ class VirtualDiskSwitchApp:
         return left <= x <= right and top <= y <= bottom
 
     def move_focus(self, step):
+        if self.confirm_mode:
+            self.confirm_focus = (self.confirm_focus + step) % len(self.confirm_buttons)
+            self.message = "Disable ISO/Image mount first?"
+            return
         self.focus_index = (self.focus_index + step) % len(self.buttons)
         self.message = self.buttons[self.focus_index]["label"]
 
@@ -439,7 +598,14 @@ class VirtualDiskSwitchApp:
                 self.last_knob_at = now
 
         if knob_state.get("press"):
-            self.activate_button(self.buttons[self.focus_index])
+            if self.confirm_mode:
+                action = self.confirm_buttons[self.confirm_focus]["action"]
+                if action == "yes":
+                    self.start_confirmed_action()
+                else:
+                    self.cancel_confirmation()
+            else:
+                self.activate_button(self.buttons[self.focus_index])
             return "continue"
 
         tap = touch_state.get("tap")
@@ -449,10 +615,18 @@ class VirtualDiskSwitchApp:
         if self.point_in_rect(tap, self.header_exit_rect):
             return "exit"
 
-        for index, button in enumerate(self.buttons):
+        buttons = self.confirm_buttons if self.confirm_mode else self.buttons
+        for index, button in enumerate(buttons):
             if self.point_in_rect(tap, button["rect"]):
-                self.focus_index = index
-                self.activate_button(button)
+                if self.confirm_mode:
+                    self.confirm_focus = index
+                    if button["action"] == "yes":
+                        self.start_confirmed_action()
+                    else:
+                        self.cancel_confirmation()
+                else:
+                    self.focus_index = index
+                    self.activate_button(button)
                 return "continue"
 
         return "continue"
@@ -481,40 +655,67 @@ class VirtualDiskSwitchApp:
         draw.line((31, 17, 17, 31), fill=TEXT, width=3)
         draw.text((50, 12), "VIRTUAL DISK", fill=TEXT, font=self.font_large)
 
-        draw.rounded_rectangle((8, 48, 312, 108), radius=16, fill=PANEL_ALT)
-        draw.text((18, 58), "Source", fill=SUCCESS if not self.error else ERROR, font=self.font_small)
-        draw.text((18, 72), {"disable": "Disable", "emmc": "eMMC", "sdcard": "SD Card"}.get(self.state["mode"], "-"), fill=TEXT, font=self.font_xlarge)
-        draw.text((18, 94), clip_to_width(draw, self.state["detail"], self.font_small, 276), fill=MUTED, font=self.font_small)
+        draw.rounded_rectangle((8, 48, 312, 102), radius=16, fill=PANEL_ALT)
+        draw.text((18, 56), "Source", fill=SUCCESS if not self.error else ERROR, font=self.font_small)
+        draw.text((18, 68), {"disable": "Disable", "emmc": "eMMC", "sdcard": "SD Card"}.get(self.state["mode"], "-"), fill=TEXT, font=self.font_xlarge)
+        draw.text((18, 90), clip_to_width(draw, self.state["detail"], self.font_small, 276), fill=MUTED, font=self.font_small)
 
-        for index, button in enumerate(self.buttons):
-            mode = button["mode"]
-            active = self.state["mode"] == mode
-            if mode == "sdcard":
-                available = self.state["sdcard_available"]
-            elif mode == "emmc":
-                available = self.state["emmc_available"]
-            else:
-                available = True
-            fill = ACCENT if active else WARNING
-            focused = index == self.focus_index
-            self.draw_button(
-                draw,
-                button["rect"],
-                button["label"],
-                fill,
-                focused=focused,
-                disabled=(self.busy or not available),
-                font=self.font_small if button["label"] == "SD Card" else self.font_medium,
-            )
+        if self.confirm_mode:
+            prompt_lines = wrap_text(draw, "ISO/Image mount is active. Unmount it now?", self.font_small, 276, max_lines=2)
+            draw.rounded_rectangle((8, 106, 312, 164), radius=16, fill=(48, 22, 24), outline=ERROR, width=2)
+            text_y = 110
+            for line in prompt_lines:
+                draw.text((18, text_y), line, fill=ERROR, font=self.font_small)
+                text_y += 11
 
-        draw.rounded_rectangle((8, 112, 312, 164), radius=16, outline=(64, 78, 96), width=2)
-        footer_color = ERROR if self.error else MUTED
-        draw.text((18, 18 + 130), clip_to_width(draw, self.message, self.font_small, 276), fill=footer_color, font=self.font_small)
+            for index, button in enumerate(self.confirm_buttons):
+                self.draw_button(
+                    draw,
+                    button["rect"],
+                    button["label"],
+                    SUCCESS if button["action"] == "yes" else WARNING,
+                    focused=index == self.confirm_focus,
+                    disabled=self.busy,
+                    font=self.font_medium,
+                )
+        else:
+            for index, button in enumerate(self.buttons):
+                mode = button["mode"]
+                active = self.state["mode"] == mode
+                if mode == "sdcard":
+                    available = self.state["sdcard_available"]
+                elif mode == "emmc":
+                    available = self.state["emmc_available"]
+                else:
+                    available = True
+                fill = ACCENT if active else WARNING
+                focused = index == self.focus_index
+                self.draw_button(
+                    draw,
+                    button["rect"],
+                    button["label"],
+                    fill,
+                    focused=focused,
+                    disabled=(self.busy or not available),
+                    font=self.font_small if button["label"] == "SD Card" else self.font_medium,
+                )
 
-        target = self.state.get("target") or "-"
-        draw.text((18, 150), clip_to_width(draw, target, self.font_small, 220), fill=MUTED, font=self.font_small)
-        if self.state["image_mount_active"]:
-            draw.text((234, 150), "ISO ACTIVE", fill=WARNING, font=self.font_small)
+        if (self.busy or self.error) and not self.confirm_mode:
+            panel_fill = (48, 22, 24) if self.error else PANEL_ALT
+            panel_outline = ERROR if self.error else (64, 78, 96)
+            text_font = self.font_medium if self.error else self.font_small
+            lines = wrap_text(draw, self.message, text_font, 270, max_lines=2 if self.error else 1)
+            box_top = 142
+            box_bottom = 166
+            if self.error and len(lines) > 1:
+                box_top = 136
+                box_bottom = 166
+
+            draw.rounded_rectangle((8, box_top, 312, box_bottom), radius=12, fill=panel_fill, outline=panel_outline, width=2)
+            text_y = box_top + 5
+            for line in lines:
+                draw.text((18, text_y), line, fill=ERROR if self.error else MUTED, font=text_font)
+                text_y += 12 if self.error else 10
 
         return canvas
 

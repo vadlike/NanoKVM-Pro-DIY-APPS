@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="apps/kvm-pilot/logo.gif" alt="NanoKVM Pro DIY Apps preview" width="350">
+  <img src="apps/kvm-pilot/demo.gif" alt="NanoKVM Pro DIY Apps preview" width="350">
 </p>
 
 ## App Hub Repo Format
@@ -73,37 +73,37 @@ Apps that need local settings already include a safe starter `config.json` in th
   <tr>
     <td align="center" width="50%">
       <strong>ap-WIFI</strong><br>
-      <img src="apps/ap-WIFI/logo.png" alt="ap-WIFI preview" width="320">
+      <img src="apps/ap-WIFI/demo.png" alt="ap-WIFI preview" width="320">
     </td>
     <td align="center" width="50%">
       <strong>image-mounter</strong><br>
-      <img src="apps/image-mounter/logo.png" alt="image-mounter preview" width="320">
+      <img src="apps/image-mounter/demo.gif" alt="image-mounter preview" width="320">
     </td>
   </tr>
   <tr>
     <td align="center" width="50%">
       <strong>kvm-pilot</strong><br>
-      <img src="apps/kvm-pilot/logo.gif" alt="kvm-pilot preview" width="320">
+      <img src="apps/kvm-pilot/demo.gif" alt="kvm-pilot preview" width="320">
     </td>
     <td align="center" width="50%">
       <strong>speedtest</strong><br>
-      <img src="apps/speedtest/logo.png" alt="speedtest preview" width="320">
+      <img src="apps/speedtest/demo.gif" alt="speedtest preview" width="320">
     </td>
   </tr>
   <tr>
     <td align="center" width="50%">
       <strong>SwitchKVMui</strong><br>
-      <img src="apps/SwitchKVMui/logo.png" alt="SwitchKVMui preview" width="320">
+      <img src="apps/SwitchKVMui/demo.gif" alt="SwitchKVMui preview" width="320">
     </td>
     <td align="center" width="50%">
       <strong>tailscale-toggle</strong><br>
-      <img src="apps/tailscale-toggle/logo.png" alt="tailscale-toggle preview" width="320">
+      <img src="apps/tailscale-toggle/demo.png" alt="tailscale-toggle preview" width="320">
     </td>
   </tr>
   <tr>
     <td align="center" colspan="2">
       <strong>virtual-disk-switch</strong><br>
-      <img src="apps/virtual-disk-switch/logo.png" alt="virtual-disk-switch preview" width="320">
+      <img src="apps/virtual-disk-switch/demo.gif" alt="virtual-disk-switch preview" width="320">
     </td>
   </tr>
 </table>
@@ -113,7 +113,7 @@ Apps that need local settings already include a safe starter `config.json` in th
 ### `ap-WIFI`
 
 <p align="center">
-  <img src="apps/ap-WIFI/logo.png" alt="ap-WIFI" width="380">
+  <img src="apps/ap-WIFI/demo.png" alt="ap-WIFI" width="380">
 </p>
 
 Connect NanoKVM Pro to a predefined Wi-Fi access point directly from the built-in display.
@@ -128,7 +128,7 @@ Best use case: quick recovery when you want NanoKVM Pro to rejoin a known wirele
 ### `image-mounter`
 
 <p align="center">
-  <img src="apps/image-mounter/logo.png" alt="image-mounter" width="380">
+  <img src="apps/image-mounter/demo.gif" alt="image-mounter" width="380">
 </p>
 
 Mount ISO, IMG, and EFI payloads from `/data` as virtual media on NanoKVM Pro.
@@ -143,7 +143,7 @@ Best use case: boot installers, diagnostics, firmware tools, or custom EFI paylo
 ### `kvm-pilot`
 
 <p align="center">
-  <img src="apps/kvm-pilot/logo.gif" alt="kvm-pilot" width="380">
+  <img src="apps/kvm-pilot/demo.gif" alt="kvm-pilot" width="380">
 </p>
 
 Turn NanoKVM Pro into a compact touch control center for HID injection, keyboard shortcuts, mouse actions, and scripted automation.
@@ -157,7 +157,7 @@ Best use case: remote maintenance, OS installation flows, BIOS navigation, or fa
 ### `speedtest`
 
 <p align="center">
-  <img src="apps/speedtest/logo.png" alt="speedtest" width="380">
+  <img src="apps/speedtest/demo.gif" alt="speedtest" width="380">
 </p>
 
 Run a network speed test directly on NanoKVM Pro and view the result on the local display.
@@ -171,7 +171,7 @@ Best use case: confirm that the NanoKVM network path is healthy before troublesh
 ### `SwitchKVMui`
 
 <p align="center">
-  <img src="apps/SwitchKVMui/logo.png" alt="SwitchKVMui" width="380">
+  <img src="apps/SwitchKVMui/demo.gif" alt="SwitchKVMui" width="380">
 </p>
 
 Switch the local device role between NanoKVM and PiKVM using the built-in touchscreen.
@@ -185,7 +185,7 @@ Best use case: a hybrid NanoKVM/PiKVM environment where the device is repurposed
 ### `tailscale-toggle`
 
 <p align="center">
-  <img src="apps/tailscale-toggle/logo.png" alt="tailscale-toggle" width="380">
+  <img src="apps/tailscale-toggle/demo.png" alt="tailscale-toggle" width="380">
 </p>
 
 Enable or disable Tailscale from the NanoKVM Pro touchscreen without opening a terminal.
@@ -199,7 +199,7 @@ Best use case: quickly bring secure remote access online or take it offline dire
 ### `virtual-disk-switch`
 
 <p align="center">
-  <img src="apps/virtual-disk-switch/logo.png" alt="virtual-disk-switch" width="380">
+  <img src="apps/virtual-disk-switch/demo.gif" alt="virtual-disk-switch" width="380">
 </p>
 
 Switch the Virtual Disk source between disabled mode, internal eMMC, and SD card.
