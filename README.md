@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="apps/kvm-pilot/logo.gif" alt="NanoKVM Pro DIY Apps preview" width="760">
+  <img src="apps/kvm-pilot/logo.gif" alt="NanoKVM Pro DIY Apps preview" width="344">
 </p>
 
 ## App Hub Repo Format
