@@ -1,0 +1,7 @@
+REM TITLE: Drag And Drop
+REM DESC: Demonstrates mouse button hold, movement, and release.
+MOUSE DOWN LEFT
+WAIT 120
+MOUSE MOVE 60 25
+WAIT 120
+MOUSE UP LEFT

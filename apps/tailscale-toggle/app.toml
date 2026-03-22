@@ -1,0 +1,11 @@
+[application]
+name = "tailscale-toggle"
+version = "1.0.0"
+descriptions = "Enable or disable Tailscale from the built-in NanoKVM touch display."
+
+[author]
+name = "vadlike"
+url = "https://github.com/vadlike/NanoKVM-Pro-DIY-APPS"
+
+[interaction]
+requires_user_input = true

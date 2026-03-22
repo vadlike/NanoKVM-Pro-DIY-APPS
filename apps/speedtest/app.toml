@@ -1,0 +1,11 @@
+[application]
+name = "speedtest"
+version = "1.0.0"
+descriptions = "Run an internet speed test on NanoKVM and show ping, download, upload, and server info."
+
+[author]
+name = "vadlike"
+url = "https://github.com/vadlike/NanoKVM-Pro-DIY-APPS"
+
+[interaction]
+requires_user_input = true

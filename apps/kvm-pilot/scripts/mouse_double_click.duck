@@ -1,0 +1,5 @@
+REM TITLE: Mouse Double Click
+REM DESC: Demonstrates two quick left clicks.
+MOUSE CLICK LEFT
+WAIT 120
+MOUSE CLICK LEFT

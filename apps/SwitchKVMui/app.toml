@@ -1,0 +1,11 @@
+[application]
+name = "SwitchKVMui"
+version = "1.0.0"
+descriptions = "Switch between NanoKVM and PiKVM locally from the built-in touch display."
+
+[author]
+name = "vadlike"
+url = "https://github.com/vadlike/NanoKVM-Pro-DIY-APPS"
+
+[interaction]
+requires_user_input = true

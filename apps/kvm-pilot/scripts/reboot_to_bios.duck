@@ -1,0 +1,8 @@
+REM TITLE: Reboot To BIOS
+REM DESC: Reboot a Windows target directly into UEFI firmware settings.
+REM NOTE: Requires a Windows target with UEFI firmware support.
+DELAY 1000
+GUI r
+DELAY 800
+STRING shutdown /r /fw /t 0
+ENTER

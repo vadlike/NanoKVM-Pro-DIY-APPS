@@ -1,0 +1,11 @@
+[application]
+name = "kvm-pilot"
+version = "1.0.0"
+descriptions = "Control scripts, BIOS keys, keyboard and mouse through NanoKVM HID injection."
+
+[author]
+name = "vadlike"
+url = "https://github.com/vadlike/NanoKVM-Pro-DIY-APPS"
+
+[interaction]
+requires_user_input = true

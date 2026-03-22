@@ -1,0 +1,62 @@
+[[apps]]
+folder = "ap-WIFI"
+application_name = "ap-WIFI"
+application_version = "1.0.0"
+application_descriptions = "Connect NanoKVM to the configured Wi-Fi access point."
+author_name = "vadlike"
+interaction_requires_user_input = true
+files = [ "ap-WIFI/app.toml", "ap-WIFI/config.example.json", "ap-WIFI/main.py",]
+
+[[apps]]
+folder = "image-mounter"
+application_name = "image-mounter"
+application_version = "1.0.0"
+application_descriptions = "Mount ISO, IMG, or EFI payloads from /data as Mass Storage or CD-ROM on NanoKVM."
+author_name = "vadlike"
+interaction_requires_user_input = true
+files = [ "image-mounter/app.toml", "image-mounter/config.example.json", "image-mounter/main.py",]
+
+[[apps]]
+folder = "kvm-pilot"
+application_name = "kvm-pilot"
+application_version = "1.0.0"
+application_descriptions = "Control scripts, BIOS keys, keyboard and mouse through NanoKVM HID injection."
+author_name = "vadlike"
+interaction_requires_user_input = true
+files = [ "kvm-pilot/app.toml", "kvm-pilot/main.py", "kvm-pilot/scripts/cmd.exe", "kvm-pilot/scripts/ctrl_alt_delete.duck", "kvm-pilot/scripts/drag_and_drop.duck", "kvm-pilot/scripts/get_net_ip_configuration.ps1", "kvm-pilot/scripts/ipconfig.bat", "kvm-pilot/scripts/ipconfig.ps1", "kvm-pilot/scripts/mouse_click_left.duck", "kvm-pilot/scripts/mouse_double_click.duck", "kvm-pilot/scripts/mouse_move_right.duck", "kvm-pilot/scripts/mouse_wheel_down.duck", "kvm-pilot/scripts/notepad.exe", "kvm-pilot/scripts/powershell.exe", "kvm-pilot/scripts/reboot_to_bios.bat", "kvm-pilot/scripts/reboot_to_bios.duck", "kvm-pilot/scripts/reboot_to_bios.ps1", "kvm-pilot/scripts/systeminfo.bat", "kvm-pilot/scripts/systeminfo.ps1", "kvm-pilot/scripts/uac_confirm.duck", "kvm-pilot/scripts/whoami.bat", "kvm-pilot/scripts/whoami.ps1",]
+
+[[apps]]
+folder = "speedtest"
+application_name = "speedtest"
+application_version = "1.0.0"
+application_descriptions = "Run an internet speed test on NanoKVM and show ping, download, upload, and server info."
+author_name = "vadlike"
+interaction_requires_user_input = true
+files = [ "speedtest/app.toml", "speedtest/main.py",]
+
+[[apps]]
+folder = "SwitchKVMui"
+application_name = "SwitchKVMui"
+application_version = "1.0.0"
+application_descriptions = "Switch between NanoKVM and PiKVM locally from the built-in touch display."
+author_name = "vadlike"
+interaction_requires_user_input = true
+files = [ "SwitchKVMui/app.toml", "SwitchKVMui/main.py",]
+
+[[apps]]
+folder = "tailscale-toggle"
+application_name = "tailscale-toggle"
+application_version = "1.0.0"
+application_descriptions = "Enable or disable Tailscale from the built-in NanoKVM touch display."
+author_name = "vadlike"
+interaction_requires_user_input = true
+files = [ "tailscale-toggle/app.toml", "tailscale-toggle/main.py",]
+
+[[apps]]
+folder = "virtual-disk-switch"
+application_name = "virtual-disk-switch"
+application_version = "1.0.0"
+application_descriptions = "Switch Virtual Disk source between Disable, eMMC, and SD Card on NanoKVM Pro."
+author_name = "vadlike"
+interaction_requires_user_input = true
+files = [ "virtual-disk-switch/app.toml", "virtual-disk-switch/main.py",]

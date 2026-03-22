@@ -1,0 +1,6 @@
+REM TITLE: Ctrl Alt Delete
+REM DESC: Demonstrates HOLD and RELEASE ALL with the Windows secure attention sequence.
+HOLD CTRL
+HOLD ALT
+DELETE
+RELEASE ALL

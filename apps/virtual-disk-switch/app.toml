@@ -1,0 +1,11 @@
+[application]
+name = "virtual-disk-switch"
+version = "1.0.0"
+descriptions = "Switch Virtual Disk source between Disable, eMMC, and SD Card on NanoKVM Pro."
+
+[author]
+name = "vadlike"
+url = "https://github.com/vadlike/NanoKVM-Pro-DIY-APPS"
+
+[interaction]
+requires_user_input = true

@@ -1,0 +1,11 @@
+[application]
+name = "image-mounter"
+version = "1.0.0"
+descriptions = "Mount ISO, IMG, or EFI payloads from /data as Mass Storage or CD-ROM on NanoKVM."
+
+[author]
+name = "vadlike"
+url = "https://github.com/vadlike/NanoKVM-Pro-DIY-APPS"
+
+[interaction]
+requires_user_input = true

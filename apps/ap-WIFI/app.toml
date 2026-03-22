@@ -1,0 +1,11 @@
+[application]
+name = "ap-WIFI"
+version = "1.0.0"
+descriptions = "Connect NanoKVM to the configured Wi-Fi access point."
+
+[author]
+name = "vadlike"
+url = "https://github.com/vadlike/NanoKVM-Pro-DIY-APPS"
+
+[interaction]
+requires_user_input = true
