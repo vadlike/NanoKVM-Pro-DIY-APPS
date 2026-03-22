@@ -68,8 +68,8 @@ install_app() {
     if [ -n "${backup_dir}" ]; then
         echo "Backup saved -> ${backup_dir}"
     fi
-    if [ -f "${dest_dir}/config.example.json" ] && [ ! -f "${dest_dir}/config.json" ]; then
-        echo "Note: ${app_name} has config.example.json. Create config.json if the app needs local settings."
+    if [ -f "${dest_dir}/config.json" ]; then
+        echo "Config prepared -> ${dest_dir}/config.json"
     fi
 }
 

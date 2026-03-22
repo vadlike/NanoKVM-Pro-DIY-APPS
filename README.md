@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="apps/kvm-pilot/logo.gif" alt="NanoKVM Pro DIY Apps preview" width="344">
+  <img src="apps/kvm-pilot/logo.gif" alt="NanoKVM Pro DIY Apps preview" width="350">
 </p>
 
 ## App Hub Repo Format
@@ -53,6 +53,8 @@ The installer:
 - preserves an existing `config.json` if the app already had one
 - stores the previous version under `/userapp/.install-backup`
 
+If an app includes `config.json`, it is installed as a starter template. You still need to edit the values manually on NanoKVM for your own environment.
+
 ## What Is Inside
 
 Each app package contains:
@@ -63,7 +65,7 @@ Each app package contains:
 
 The apps are designed for the NanoKVM Pro touchscreen and focus on fast local actions without needing to open the web UI for every small task.
 
-For public sharing, the APP Hub package excludes real `config.json` files so secrets such as Wi-Fi passwords are not published by accident.
+Apps that need local settings already include a safe starter `config.json` in the repository.
 
 ## App Gallery
 
@@ -117,7 +119,7 @@ For public sharing, the APP Hub package excludes real `config.json` files so sec
 Connect NanoKVM Pro to a predefined Wi-Fi access point directly from the built-in display.
 
 - Reads target SSID and password from `config.json`
-- Public repo includes `config.example.json`; create `config.json` on the device with your own Wi-Fi credentials
+- The repository already includes a starter `config.json`, but you must manually enter your own Wi-Fi values on the device
 - Uses the local Wi-Fi stack to connect or disconnect without leaving the device UI
 - Shows current connection state, SSID, signal information, and network details on screen
 
@@ -132,6 +134,7 @@ Best use case: quick recovery when you want NanoKVM Pro to rejoin a known wirele
 Mount ISO, IMG, and EFI payloads from `/data` as virtual media on NanoKVM Pro.
 
 - Browses locally stored images and mounts them through the NanoKVM API
+- Includes a starter `config.json`; if needed, update the NanoKVM login credentials in it manually
 - Supports virtual CD-ROM / mass-storage style workflows
 - Can wrap `.efi` payloads into a bootable FAT image automatically for easier UEFI boot scenarios
 

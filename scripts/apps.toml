@@ -5,7 +5,7 @@ application_version = "1.0.0"
 application_descriptions = "Connect NanoKVM to the configured Wi-Fi access point."
 author_name = "vadlike"
 interaction_requires_user_input = true
-files = [ "ap-WIFI/app.toml", "ap-WIFI/config.example.json", "ap-WIFI/main.py",]
+files = [ "ap-WIFI/app.toml", "ap-WIFI/config.json", "ap-WIFI/main.py",]
 
 [[apps]]
 folder = "image-mounter"
@@ -14,7 +14,7 @@ application_version = "1.0.0"
 application_descriptions = "Mount ISO, IMG, or EFI payloads from /data as Mass Storage or CD-ROM on NanoKVM."
 author_name = "vadlike"
 interaction_requires_user_input = true
-files = [ "image-mounter/app.toml", "image-mounter/config.example.json", "image-mounter/main.py",]
+files = [ "image-mounter/app.toml", "image-mounter/config.json", "image-mounter/main.py",]
 
 [[apps]]
 folder = "kvm-pilot"
