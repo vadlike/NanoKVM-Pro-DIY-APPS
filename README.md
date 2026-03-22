@@ -28,28 +28,22 @@ This repository now includes an APP Hub compatible layout based on the official 
 - `apps/<app-name>/...`
 - `scripts/apps.toml`
 
-The `scripts/apps.toml` index is generated from the `apps` directory and is the key file NanoKVM APP Hub uses to discover installable applications.
+The `scripts/apps.toml` index is the manifest file for the NanoKVM APP catalog, and `scripts/install-userapp.sh` is the direct installer used from NanoKVM shell.
 
 ## Install Over SSH
 
 Current NanoKVM Pro firmware hardcodes the public APP Hub source, so the practical way to install this catalog today is over SSH.
 
-Install all apps from a Windows or Linux workstation:
+Install all apps directly on NanoKVM:
 
-```bash
-python scripts/install_over_ssh.py --host 192.168.27.159 --user root --password admin all
+```sh
+curl -fsSL https://raw.githubusercontent.com/vadlike/NanoKVM-Pro-DIY-APPS/main/scripts/install-userapp.sh | sh -s -- all
 ```
 
 Install one app only:
 
-```bash
-python scripts/install_over_ssh.py --host 192.168.27.159 --user root --password admin kvm-pilot
-```
-
-You can also run the installer directly on NanoKVM:
-
 ```sh
-curl -fsSL https://raw.githubusercontent.com/vadlike/NanoKVM-Pro-DIY-APPS/main/scripts/install-userapp.sh | sh -s -- all
+curl -fsSL https://raw.githubusercontent.com/vadlike/NanoKVM-Pro-DIY-APPS/main/scripts/install-userapp.sh | sh -s -- kvm-pilot
 ```
 
 The installer:
@@ -73,22 +67,51 @@ For public sharing, the APP Hub package excludes real `config.json` files so sec
 
 ## App Gallery
 
-| App | Preview |
-| --- | --- |
-| `ap-WIFI` | <img src="apps/ap-WIFI/logo.png" alt="ap-WIFI preview" width="280"> |
-| `image-mounter` | <img src="apps/image-mounter/logo.png" alt="image-mounter preview" width="280"> |
-| `kvm-pilot` | <img src="apps/kvm-pilot/logo.gif" alt="kvm-pilot preview" width="280"> |
-| `speedtest` | <img src="apps/speedtest/logo.png" alt="speedtest preview" width="280"> |
-| `SwitchKVMui` | <img src="apps/SwitchKVMui/logo.png" alt="SwitchKVMui preview" width="280"> |
-| `tailscale-toggle` | <img src="apps/tailscale-toggle/logo.png" alt="tailscale-toggle preview" width="280"> |
-| `virtual-disk-switch` | <img src="apps/virtual-disk-switch/logo.png" alt="virtual-disk-switch preview" width="280"> |
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <strong>ap-WIFI</strong><br>
+      <img src="apps/ap-WIFI/logo.png" alt="ap-WIFI preview" width="320">
+    </td>
+    <td align="center" width="50%">
+      <strong>image-mounter</strong><br>
+      <img src="apps/image-mounter/logo.png" alt="image-mounter preview" width="320">
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <strong>kvm-pilot</strong><br>
+      <img src="apps/kvm-pilot/logo.gif" alt="kvm-pilot preview" width="320">
+    </td>
+    <td align="center" width="50%">
+      <strong>speedtest</strong><br>
+      <img src="apps/speedtest/logo.png" alt="speedtest preview" width="320">
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <strong>SwitchKVMui</strong><br>
+      <img src="apps/SwitchKVMui/logo.png" alt="SwitchKVMui preview" width="320">
+    </td>
+    <td align="center" width="50%">
+      <strong>tailscale-toggle</strong><br>
+      <img src="apps/tailscale-toggle/logo.png" alt="tailscale-toggle preview" width="320">
+    </td>
+  </tr>
+  <tr>
+    <td align="center" colspan="2">
+      <strong>virtual-disk-switch</strong><br>
+      <img src="apps/virtual-disk-switch/logo.png" alt="virtual-disk-switch preview" width="320">
+    </td>
+  </tr>
+</table>
 
 ## Included Apps
 
 ### `ap-WIFI`
 
 <p align="center">
-  <img src="apps/ap-WIFI/logo.png" alt="ap-WIFI" width="420">
+  <img src="apps/ap-WIFI/logo.png" alt="ap-WIFI" width="380">
 </p>
 
 Connect NanoKVM Pro to a predefined Wi-Fi access point directly from the built-in display.
@@ -103,7 +126,7 @@ Best use case: quick recovery when you want NanoKVM Pro to rejoin a known wirele
 ### `image-mounter`
 
 <p align="center">
-  <img src="apps/image-mounter/logo.png" alt="image-mounter" width="420">
+  <img src="apps/image-mounter/logo.png" alt="image-mounter" width="380">
 </p>
 
 Mount ISO, IMG, and EFI payloads from `/data` as virtual media on NanoKVM Pro.
@@ -117,7 +140,7 @@ Best use case: boot installers, diagnostics, firmware tools, or custom EFI paylo
 ### `kvm-pilot`
 
 <p align="center">
-  <img src="apps/kvm-pilot/logo.gif" alt="kvm-pilot" width="420">
+  <img src="apps/kvm-pilot/logo.gif" alt="kvm-pilot" width="380">
 </p>
 
 Turn NanoKVM Pro into a compact touch control center for HID injection, keyboard shortcuts, mouse actions, and scripted automation.
@@ -131,7 +154,7 @@ Best use case: remote maintenance, OS installation flows, BIOS navigation, or fa
 ### `speedtest`
 
 <p align="center">
-  <img src="apps/speedtest/logo.png" alt="speedtest" width="420">
+  <img src="apps/speedtest/logo.png" alt="speedtest" width="380">
 </p>
 
 Run a network speed test directly on NanoKVM Pro and view the result on the local display.
@@ -145,7 +168,7 @@ Best use case: confirm that the NanoKVM network path is healthy before troublesh
 ### `SwitchKVMui`
 
 <p align="center">
-  <img src="apps/SwitchKVMui/logo.png" alt="SwitchKVMui" width="420">
+  <img src="apps/SwitchKVMui/logo.png" alt="SwitchKVMui" width="380">
 </p>
 
 Switch the local device role between NanoKVM and PiKVM using the built-in touchscreen.
@@ -159,7 +182,7 @@ Best use case: a hybrid NanoKVM/PiKVM environment where the device is repurposed
 ### `tailscale-toggle`
 
 <p align="center">
-  <img src="apps/tailscale-toggle/logo.png" alt="tailscale-toggle" width="420">
+  <img src="apps/tailscale-toggle/logo.png" alt="tailscale-toggle" width="380">
 </p>
 
 Enable or disable Tailscale from the NanoKVM Pro touchscreen without opening a terminal.
@@ -173,7 +196,7 @@ Best use case: quickly bring secure remote access online or take it offline dire
 ### `virtual-disk-switch`
 
 <p align="center">
-  <img src="apps/virtual-disk-switch/logo.png" alt="virtual-disk-switch" width="420">
+  <img src="apps/virtual-disk-switch/logo.png" alt="virtual-disk-switch" width="380">
 </p>
 
 Switch the Virtual Disk source between disabled mode, internal eMMC, and SD card.
@@ -201,7 +224,7 @@ apps/
   virtual-disk-switch/
 scripts/
   apps.toml
-  collect.py
+  install-userapp.sh
 ```
 
-Each directory inside `apps/` is an independent mini app, and `scripts/apps.toml` is the manifest for NanoKVM APP Hub.
+Each directory inside `apps/` is an independent mini app, `scripts/apps.toml` is the catalog manifest, and `scripts/install-userapp.sh` is the installer entry point.
