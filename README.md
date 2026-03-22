@@ -2,7 +2,7 @@
 
 <p align="center">
   <img src="https://visitor-badge.laobi.icu/badge?page_id=vadlike.NanoKVM-Pro-DIY-APPS" alt="visitors">
-  <img src="https://img.shields.io/github/license/vadlike/NanoKVM-Pro-DIY-APPS" alt="license">
+  <img src="https://img.shields.io/badge/license-GPL--3.0-blue.svg" alt="license GPL-3.0">
   <img src="https://img.shields.io/github/last-commit/vadlike/NanoKVM-Pro-DIY-APPS" alt="last commit">
   <a href="https://wiki.sipeed.com/hardware/en/kvm/NanoKVM_Pro/introduction.html">
     <img src="https://img.shields.io/badge/NanoKVM%20Pro-Official%20Device%20Page-red" alt="NanoKVM Pro device">
@@ -131,7 +131,7 @@ Best use case: quick recovery when you want NanoKVM Pro to rejoin a known wirele
   <img src="apps/image-mounter/demo.gif" alt="image-mounter" width="380">
 </p>
 
-Mount ISO, IMG, and EFI payloads from `/data` as virtual media on NanoKVM Pro.
+Mount ISO, IMG, and EFI payloads from `/data` or `/sdcard` as virtual media on NanoKVM Pro.
 
 - Browses locally stored images and mounts them through the NanoKVM API
 - Includes a starter `config.json`; if needed, update the NanoKVM login credentials in it manually
