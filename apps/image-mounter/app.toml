@@ -1,7 +1,7 @@
 [application]
 name = "image-mounter"
 version = "1.0.0"
-descriptions = "Mount ISO, IMG, or EFI payloads from /data as Mass Storage or CD-ROM on NanoKVM."
+descriptions = "Mount ISO, IMG, or EFI payloads from /data or /sdcard as Mass Storage or CD-ROM on NanoKVM."
 
 [author]
 name = "vadlike"

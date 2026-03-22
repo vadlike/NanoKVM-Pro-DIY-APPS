@@ -21,7 +21,11 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 
-IMAGE_DIRECTORY = "/data"
+DEFAULT_IMAGE_DIRECTORY = "/data"
+IMAGE_DIRECTORIES = (
+    "/data",
+    "/sdcard",
+)
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 IMAGE_NONE = "/dev/mmcblk0p3"
 ACCOUNT_FILE = "/etc/kvm/pwd"
@@ -338,6 +342,20 @@ class ImageBackend:
         self.api_token = self.build_api_token()
         self.api_username = self.read_account_username()
         self.app_config = self.read_app_config()
+
+    def available_sources(self):
+        sources = []
+        for path in IMAGE_DIRECTORIES:
+            if os.path.isdir(path):
+                sources.append(path)
+        if not sources:
+            sources.append(DEFAULT_IMAGE_DIRECTORY)
+        return sources
+
+    def normalize_source(self, source_dir):
+        if source_dir in IMAGE_DIRECTORIES:
+            return source_dir
+        return DEFAULT_IMAGE_DIRECTORY
 
     def read_server_config(self):
         config = {
@@ -885,11 +903,12 @@ class ImageBackend:
             return self.prepare_efi_mount_image(file_path)
         return file_path
 
-    def list_images(self):
+    def list_images(self, source_dir=None):
+        root_dir = self.normalize_source(source_dir)
         images = []
-        if not os.path.isdir(IMAGE_DIRECTORY):
+        if not os.path.isdir(root_dir):
             return images
-        for root, _dirs, files in os.walk(IMAGE_DIRECTORY):
+        for root, _dirs, files in os.walk(root_dir):
             for name in files:
                 if is_supported_image_path(name):
                     images.append(os.path.join(root, name))
@@ -1092,8 +1111,10 @@ class ImageBackend:
         self.set_udc_enabled(paths, True)
         return "Image unmounted"
 
-    def status(self):
-        files = self.list_images()
+    def status(self, source_dir=None):
+        source_dir = self.normalize_source(source_dir)
+        available_sources = self.available_sources()
+        files = self.list_images(source_dir)
         sizes = self.build_size_map(files)
         mounted = self.resolve_mount_source(self.current_mount())
         try:
@@ -1101,6 +1122,8 @@ class ImageBackend:
             status["files"] = files
             status["sizes"] = sizes
             status["mounted"] = self.resolve_mount_source(status.get("mounted", ""))
+            status["source_dir"] = source_dir
+            status["available_sources"] = available_sources
             return status
         except Exception as exc:
             self.last_setup_error = str(exc)
@@ -1116,6 +1139,8 @@ class ImageBackend:
                 "readonly": self.current_readonly(),
                 "storage_ready": storage_ready,
                 "backend": "sysfs",
+                "source_dir": source_dir,
+                "available_sources": available_sources,
             }
         return {
             "files": files,
@@ -1125,6 +1150,8 @@ class ImageBackend:
             "readonly": False,
             "storage_ready": False,
             "backend": "offline",
+            "source_dir": source_dir,
+            "available_sources": available_sources,
         }
 
 
@@ -1135,7 +1162,12 @@ class ImageMounterApp:
         self.font_large = load_font(18)
         self.font_xlarge = load_font(20)
         self.backend = ImageBackend()
-        self.data = self.backend.status()
+        self.source_dir = DEFAULT_IMAGE_DIRECTORY
+        available_sources = self.backend.available_sources()
+        if self.source_dir not in available_sources and available_sources:
+            self.source_dir = available_sources[0]
+        self.data = self.backend.status(self.source_dir)
+        self.source_dir = self.data.get("source_dir", self.source_dir)
         self.mode_cdrom = True
         if self.data.get("mounted"):
             self.mode_cdrom = bool(self.data.get("cdrom", False))
@@ -1156,12 +1188,20 @@ class ImageMounterApp:
         }
         self.library_buttons = {
             "back": (14, 54, 82, 78),
+            "source_data": (92, 54, 158, 78),
+            "source_sdcard": (168, 54, 250, 78),
         }
         self.file_panel = (8, 48, 312, 108)
         self.library_panel = (8, 48, 312, 164)
         self.gesture_start = None
         self.marquee_started_at = time.time()
         self.sync_selection()
+
+    def source_available(self, source_dir):
+        return source_dir in (self.data.get("available_sources") or [])
+
+    def source_label(self, source_dir):
+        return source_dir if source_dir in IMAGE_DIRECTORIES else DEFAULT_IMAGE_DIRECTORY
 
     def reset_marquee(self):
         self.marquee_started_at = time.time()
@@ -1191,7 +1231,11 @@ class ImageMounterApp:
         if self.screen == "main":
             return [("button", "mode"), ("button", "mount"), ("button", "library")]
 
-        items = [("button", "back")]
+        items = [
+            ("button", "back"),
+            ("button", "source_data"),
+            ("button", "source_sdcard"),
+        ]
         files = self.data.get("files", [])
         for index in range(len(files)):
             items.append(("file", index))
@@ -1229,7 +1273,8 @@ class ImageMounterApp:
         self.activate("file")
 
     def refresh(self, message="Refreshed"):
-        self.data = self.backend.status()
+        self.data = self.backend.status(self.source_dir)
+        self.source_dir = self.data.get("source_dir", self.source_dir)
         if self.data.get("mounted"):
             self.mode_cdrom = bool(self.data.get("cdrom", False))
         else:
@@ -1256,7 +1301,7 @@ class ImageMounterApp:
 
     def open_library(self):
         self.screen = "library"
-        self.focus_index = 1 if self.data.get("files") else 0
+        self.focus_index = 1 if self.source_dir == "/data" else 2
         self.message = "Swipe right to go back"
         self.render_key = None
         self.sync_selection()
@@ -1276,6 +1321,24 @@ class ImageMounterApp:
         self.data["cdrom"] = self.mode_cdrom
         self.message = "Mode: {0}".format("CD-ROM" if self.mode_cdrom else "Mass Storage")
         return self.message
+
+    def switch_source(self, source_dir):
+        source_dir = self.backend.normalize_source(source_dir)
+        if not self.source_available(source_dir):
+            self.error = None
+            self.message = "{0} is not available".format(source_dir)
+            self.last_checked = time.strftime("%H:%M:%S")
+            self.render_key = None
+            return
+        if self.source_dir == source_dir:
+            self.message = "Source: {0}".format(source_dir)
+            self.last_checked = time.strftime("%H:%M:%S")
+            self.render_key = None
+            return
+        self.source_dir = source_dir
+        self.selected_index = 0
+        self.scroll_offset = 0
+        self.refresh("Source: {0}".format(source_dir))
 
     def start_background_action(self, status_message, worker):
         if self.busy:
@@ -1312,6 +1375,12 @@ class ImageMounterApp:
                 return
             if target == "back":
                 self.close_library("Back to image view")
+                return
+            if target == "source_data":
+                self.switch_source("/data")
+                return
+            if target == "source_sdcard":
+                self.switch_source("/sdcard")
                 return
             if target == "mount":
                 selected = self.current_file()
@@ -1386,15 +1455,16 @@ class ImageMounterApp:
                 self.open_library()
                 return "continue"
         else:
-            if self.point_in_rect(tap, self.library_buttons["back"]):
-                self.focus_index = 0
-                self.activate("back")
-                return "continue"
+            for position, (name, rect) in enumerate(self.library_buttons.items()):
+                if self.point_in_rect(tap, rect):
+                    self.focus_index = position
+                    self.activate(name)
+                    return "continue"
             for rect, index, _file in self.file_rows():
                 if self.point_in_rect(tap, rect):
                     self.selected_index = index
                     self.sync_selection()
-                    self.focus_index = 1 + index
+                    self.focus_index = len(self.library_buttons) + index
                     self.activate("file")
                     return "continue"
         return "continue"
@@ -1558,7 +1628,7 @@ class ImageMounterApp:
         )
 
         footer = "{0} | {1} | checked {2}".format(
-            "CD-ROM" if self.mode_cdrom else "Mass Storage",
+            "{0} @ {1}".format("CD-ROM" if self.mode_cdrom else "Mass Storage", self.source_label(self.source_dir)),
             self.message,
             self.last_checked,
         )
@@ -1578,10 +1648,27 @@ class ImageMounterApp:
             focused=current_focus == ("button", "back"),
             disabled=self.busy,
         )
+        self.draw_button(
+            draw,
+            self.library_buttons["source_data"],
+            "/data",
+            SUCCESS if self.source_dir == "/data" else WARNING,
+            focused=current_focus == ("button", "source_data"),
+            disabled=self.busy or not self.source_available("/data"),
+        )
+        self.draw_button(
+            draw,
+            self.library_buttons["source_sdcard"],
+            "/sdcard",
+            SUCCESS if self.source_dir == "/sdcard" else WARNING,
+            focused=current_focus == ("button", "source_sdcard"),
+            disabled=self.busy or not self.source_available("/sdcard"),
+        )
 
         files = self.data.get("files", [])
         if not files:
-            draw.text((18, 82), "No .iso, .img, or .efi files in /data", fill=MUTED, font=self.font_medium)
+            message = "No .iso, .img, or .efi files in {0}".format(self.source_dir)
+            draw.text((18, 82), clip_to_width(draw, message, self.font_medium, 284), fill=MUTED, font=self.font_medium)
             return
 
         rows = self.file_rows()
@@ -1614,6 +1701,8 @@ class ImageMounterApp:
             tuple(self.data.get("files", [])),
             self.data.get("mounted", ""),
             self.data.get("cdrom", False),
+            self.source_dir,
+            tuple(self.data.get("available_sources", [])),
             self.message,
             self.error,
             self.busy,
