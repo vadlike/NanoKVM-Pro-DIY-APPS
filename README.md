@@ -30,6 +30,35 @@ This repository now includes an APP Hub compatible layout based on the official 
 
 The `scripts/apps.toml` index is generated from the `apps` directory and is the key file NanoKVM APP Hub uses to discover installable applications.
 
+## Install Over SSH
+
+Current NanoKVM Pro firmware hardcodes the public APP Hub source, so the practical way to install this catalog today is over SSH.
+
+Install all apps from a Windows or Linux workstation:
+
+```bash
+python scripts/install_over_ssh.py --host 192.168.27.159 --user root --password admin all
+```
+
+Install one app only:
+
+```bash
+python scripts/install_over_ssh.py --host 192.168.27.159 --user root --password admin kvm-pilot
+```
+
+You can also run the installer directly on NanoKVM:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/vadlike/NanoKVM-Pro-DIY-APPS/main/scripts/install-userapp.sh | sh -s -- all
+```
+
+The installer:
+
+- downloads the selected revision of this GitHub repository
+- installs apps into `/userapp`
+- preserves an existing `config.json` if the app already had one
+- stores the previous version under `/userapp/.install-backup`
+
 ## What Is Inside
 
 Each app package contains:
