@@ -3,7 +3,6 @@
 <p align="center">
   <img src="https://visitor-badge.laobi.icu/badge?page_id=vadlike.NanoKVM-Pro-DIY-APPS" alt="visitors">
   <img src="https://img.shields.io/badge/license-GPL--3.0-blue.svg" alt="license GPL-3.0">
-  <img src="https://img.shields.io/github/last-commit/vadlike/NanoKVM-Pro-DIY-APPS" alt="last commit">
   <a href="https://wiki.sipeed.com/hardware/en/kvm/NanoKVM_Pro/introduction.html">
     <img src="https://img.shields.io/badge/NanoKVM%20Pro-Official%20Device%20Page-red" alt="NanoKVM Pro device">
   </a>
